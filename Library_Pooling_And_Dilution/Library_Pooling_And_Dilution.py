@@ -15,7 +15,7 @@ Source_positions = []
 Target_positions = []
 RSB_volumes = []
 DNA_volumes = []
-pool_volume = 15.0
+pool_volume = 13.0
 
 
 
@@ -24,7 +24,7 @@ pool_volume = 15.0
 def run(protocol: protocol_api.ProtocolContext):
     # DECLARE LABWARES/MODULES
     #### TIP RACKS
-    tiprack_20ul = protocol.load_labware('opentrons_96_tiprack_20ul', '7')
+    tiprack_300ul = protocol.load_labware('opentrons_96_tiprack_300ul', '7')
 
     #### PLATES
     # TODO
@@ -32,10 +32,9 @@ def run(protocol: protocol_api.ProtocolContext):
     lobind_tubes = protocol.load_labware('opentrons_24_aluminumblock_generic_2ml_screwcap', '6', label='Lobind Tubes')
     #### PIPETTES
     left_pipette = protocol.load_instrument('p20_multi_gen2', mount='left')
-    right_pipette = protocol.load_instrument('p300_multi_gen2', mount='right')
+    right_pipette = protocol.load_instrument('p300_multi_gen2', mount='right', tip_racks=[tiprack_300ul])
 
     sample_plate_wells = sample_plate.wells()
-    protocol.comment(str(len(sample_plate_wells)))
 
     # define tips
     def define_tip_positions_for_multi_pipette():
@@ -58,64 +57,80 @@ def run(protocol: protocol_api.ProtocolContext):
 
     def library_pooling():
         tip_positions = define_tip_positions_for_multi_pipette()
-        for index in range(96):
-            while 0 <= index <= 23:
-                left_pipette.pick_up_tip(location=tiprack_20ul[tip_positions[0]])
-                left_pipette.aspirate(location=sample_plate_wells[index].bottom(),
-                                      volume=pool_volume)
-                left_pipette.dispense(location=lobind_tubes['A1'].bottom())
+        index = 0
 
-                if water_run:
-                    left_pipette.drop_tip(location=tiprack_20ul[tip_positions[0]],
-                                          home_after=False)
-                else:
-                    left_pipette.drop_tip(home_after=False)
+        # 1ST POOL
+        right_pipette.pick_up_tip(location=tiprack_300ul[tip_positions[0]])
+        while 0 <= index <= 11:
+            right_pipette.aspirate(location=sample_plate_wells[index].bottom(), volume=pool_volume)
+            index = index + 1
+        right_pipette.dispense(location=lobind_tubes['A1'].bottom())
 
-                del tip_positions[0]
+        while 12 <= index <= 23:
+            right_pipette.aspirate(location=sample_plate_wells[index].bottom(), volume=pool_volume)
+            index = index + 1
+        right_pipette.dispense(location=lobind_tubes['A1'].bottom())
 
-            while 23 <= index <= 47:
-                left_pipette.pick_up_tip(location=tiprack_20ul[tip_positions[0]])
-                left_pipette.aspirate(location=sample_plate_wells[index].bottom(),
-                                      volume=pool_volume)
-                left_pipette.dispense(location=lobind_tubes['B1'].bottom())
+        if water_run:
+            right_pipette.drop_tip(location=tiprack_300ul[tip_positions[0]], home_after=False)
+        else:
+            right_pipette.drop_tip(home_after=False)
+        del tip_positions[0]
 
-                if water_run:
-                    left_pipette.drop_tip(location=tiprack_20ul[tip_positions[0]],
-                                          home_after=False)
-                else:
-                    left_pipette.drop_tip(home_after=False)
+        #2ND POOL
+        right_pipette.pick_up_tip(location=tiprack_300ul[tip_positions[0]])
+        while 24 <= index <= 35:
+            right_pipette.aspirate(location=sample_plate_wells[index].bottom(), volume=pool_volume)
+            index = index + 1
+        right_pipette.dispense(location=lobind_tubes['B1'].bottom())
 
-                del tip_positions[0]
+        while 36 <= index <= 47:
+            right_pipette.aspirate(location=sample_plate_wells[index].bottom(), volume=pool_volume)
+            index = index + 1
+        right_pipette.dispense(location=lobind_tubes['B1'].bottom())
 
-            while 47 <= index <= 71:
-                left_pipette.pick_up_tip(location=tiprack_20ul[tip_positions[0]])
-                left_pipette.aspirate(location=sample_plate_wells[index].bottom(),
-                                      volume=pool_volume)
-                left_pipette.dispense(location=lobind_tubes['C1'].bottom())
+        if water_run:
+            right_pipette.drop_tip(location=tiprack_300ul[tip_positions[0]], home_after=False)
+        else:
+            right_pipette.drop_tip(home_after=False)
+        del tip_positions[0]
 
-                if water_run:
-                    left_pipette.drop_tip(location=tiprack_20ul[tip_positions[0]],
-                                          home_after=False)
-                else:
-                    left_pipette.drop_tip(home_after=False)
+        # 3RD POOL
+        right_pipette.pick_up_tip(location=tiprack_300ul[tip_positions[0]])
+        while 48 <= index <= 59:
+            right_pipette.aspirate(location=sample_plate_wells[index].bottom(), volume=pool_volume)
+            index = index + 1
+        right_pipette.dispense(location=lobind_tubes['C1'].bottom())
 
-                del tip_positions[0]
+        while 60 <= index <= 71:
+            right_pipette.aspirate(location=sample_plate_wells[index].bottom(), volume=pool_volume)
+            index = index + 1
+        right_pipette.dispense(location=lobind_tubes['C1'].bottom())
 
-            while 71 <= index <= 95:
-                left_pipette.pick_up_tip(location=tiprack_20ul[tip_positions[0]])
-                left_pipette.aspirate(location=sample_plate_wells[index].bottom(),
-                                      volume=pool_volume)
-                left_pipette.dispense(location=lobind_tubes['D1'].bottom())
+        if water_run:
+            right_pipette.drop_tip(location=tiprack_300ul[tip_positions[0]], home_after=False)
+        else:
+            right_pipette.drop_tip(home_after=False)
+        del tip_positions[0]
 
-                if water_run:
-                    left_pipette.drop_tip(location=tiprack_20ul[tip_positions[0]],
-                                          home_after=False)
-                else:
-                    left_pipette.drop_tip(home_after=False)
+        # 4TH POOL
+        right_pipette.pick_up_tip(location=tiprack_300ul[tip_positions[0]])
+        while 72 <= index <= 83:
+            right_pipette.aspirate(location=sample_plate_wells[index].bottom(), volume=pool_volume)
+            index = index + 1
+        right_pipette.dispense(location=lobind_tubes['D1'].bottom())
 
-                del tip_positions[0]
+        while 84 <= index <= 95:
+            right_pipette.aspirate(location=sample_plate_wells[index].bottom(), volume=pool_volume)
+            index = index + 1
+        right_pipette.dispense(location=lobind_tubes['D1'].bottom())
+
+        if water_run:
+            right_pipette.drop_tip(location=tiprack_300ul[tip_positions[0]], home_after=False)
+        else:
+            right_pipette.drop_tip(home_after=False)
+        del tip_positions[0]
 
 
     # IF YOU WANT TO CANCEL A STEP BELOW JUST ADD '#'
-    # protocol.pause('Add Mastermix to resvoir')
     library_pooling()
